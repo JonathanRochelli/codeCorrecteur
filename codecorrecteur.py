@@ -12,22 +12,20 @@ def matriceH (l):
             matrice.append(list(y))
 
     M = np.array(matrice)
-    return (np.append(np.array(np.eye(l) ,int), np.transpose(M),axis=1))
+    return (np.append(np.transpose(M), np.array(np.eye(l) ,int),axis=1))
 
 
 def matriceG (H, l):
     matrice = []
     for elt in H:
-        matrice.append(list(elt[l:]))
+        matrice.append(list(elt[:pow(2,l)-l-1]))
     M = np.array(matrice)
-    return (np.append(np.transpose(M), np.array(np.eye(len(M[0])) ,int),axis=1))
+    return (np.append(np.array(np.eye(len(M[0])) ,int), np.transpose(M) ,axis=1))
 
 def encodage (matrice, mot):
     M = np.dot(mot,matrice)
     for i in range (np.size(M)):
         M[0][i] = M[0][i]%2
-
-    print(M)
     return M
 
 def bruitage (mot, l):
@@ -35,7 +33,7 @@ def bruitage (mot, l):
     mot[0][rdm] = (mot[0][rdm]+1) %2
     return mot
 
-def decodage (matrice, mot, l):
+def correction (matrice, mot, l):
     res = [elt for elt in range (len(mot))]
     M = np.dot(matrice,mot)
     for i in range (np.size(M)):
@@ -55,52 +53,73 @@ def gen_mot (l):
         encodage(G, [y])
     rdm = randint(0,len(liste)-1)
     return np.array([list(liste[rdm])])
-    
 
-byte=b"101010"
-var=byte.decode("utf-8")
-print (var)
+def Hachage (phrase, l):
+    return [phrase[i:i+pow(2,l)-1] for i in range(0, len(phrase), pow(2,l)-1)]
 
-print("Starting...")
 
-l=3
+print("\n")   
+print("//////////////// Exemple avec un l choisi ////////////////")
+print("\n")
+
+#Saisi utilisateur pour la valeur de l
+l = int(input("Entrer la valeur de l : "))
+#Génération d'un mot du code pour un l donné
 mot= gen_mot(l)
+print("\n")
+print("Génération du mot : ",mot)
 
-print("Mot :")
-print(mot)
-
-print("Matrice H:")
+print("\n")
+print("Matrice H : ")
+print("\n")
+#Génération de la matrice H pour un l donné
 print(matriceH(l))
 
-print("Matrice G:")
+print("\n")
+print("Matrice G : ")
+print("\n")
+#Génération de la matrice H pour un l donné et une matrice H
 print(matriceG(matriceH(l), l))
 
+print("\n")
 print("Encodage de : ",mot)
+#Encodage du mot généré un peu plus haut grâce à la matrice G
 mot_encode = encodage(matriceG(matriceH(l), l),mot)
+print("\n")
 print(mot_encode)
 
+print("\n")
 print("Bruitage de : ",mot_encode)
+#Bruitage du mot encodé précedement pour un l donné
 mot_altere = bruitage(mot_encode,l)
+print("\n")
 print(mot_altere)
 
-print("Decodage de : ",mot_altere)
-print(decodage(matriceH(l),mot_altere.T, l))
+print("\n")
+print("Correction du mot : ",mot_altere)
+print("\n")
+#Décodage du mot encodé et altéré => Le résultat doit être le mote donné précedement
+print(correction(matriceH(l),mot_altere.T, l))
+print("\n")
+print("Mot decodé : ", correction(matriceH(l),mot_altere.T, l)[0][:4])
+print("\n")
 
-
-mot = '1011101100011000110011111010001110000111011011111';
+print("//////////////// Exemple avec 'un mot à decoder' ////////////////")
+print("\n")
+l = 3
+#Phrase donnée dans le fichier d'exemple de IRIS
+phrase = '1011101100011000110011111010001110000111011011111'
+print("Un mot à decoder : ", phrase)
+print("\n")
 mot_decode = ""
-phrase = [mot[i:i+pow(2,l)-1] for i in range(0, len(mot), pow(2,l)-1)]
-print(phrase)
-for elt in phrase:
+mots = Hachage(phrase, l)
+for elt in mots:
     liste = [list(elt)]
     for i in range (len(liste[0])):
         liste[0][i] = int(liste[0][i])
-    print(np.array(liste).T)
-    mot_decode += ''.join(map(str,decodage(matriceH(l),np.array(liste).T, l)[0]))
-    print(decodage(matriceH(l),np.array(liste).T, l)[0])
-    print(''.join(map(str,decodage(matriceH(l),np.array(liste).T, l)[0])))
-print(mot_decode)
-print(binascii.unhexlify('%x' % int('0b' + mot_decode, 2)))
-1011101100011000110011111010001110000111011011111
+    mot_decode += ''.join(map(str,correction(matriceH(l),np.array(liste).T, l)[0]))[:4]
+print("Phrase décoder : ", mot_decode)
+#print(binascii.unhexlify('%x' % int('0b' + mot_decode, 2)))
+
 
 
