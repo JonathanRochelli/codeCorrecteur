@@ -9,7 +9,7 @@
 **Comment l'utiliser ?**
 
 1. Ouvrir un terminal dans le dossier du fichier.
-2. Executer `python3 codeCorrecteur.py`
+2. Executer `python3 codecorrecteur.py`
 
 **Explication**
 
